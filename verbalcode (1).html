@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Verbal Code</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+		<style type="text/css">
+			html, body { height: 100%; padding: 0; margin: 0; }
+			div { float: left; }
+			.divleft { width: 30%; }
+			.divright { width: 70%; }
+			.divtop { height: 50%; }
+			.divbottom { height: 50%; }
+			.div1 { background: #DDD; }
+			.div2 {
+				background: #efefef;
+				padding: 20px;
+				font-family: Menlo, monospace;
+			}
+			.div3 { background: #777; }
+			.div4 {
+				background: white;
+				padding: 20px;
+				font-family: Menlo, monospace;
+			}
+		</style>
+	</head>
+	<body> <!-- onkeypress="listenForKeyPress(event)"-->
+		<div class="div1 divleft divtop">
+			a
+		</div>
+		<div class="div2 divright divtop">
+			<table>
+				<tr>
+					<td style="padding-right: 10px !important;">></td>
+					<td id="input"></td>
+				</tr>
+			</table>
+		</div>
+		<div class="div3 divleft divbottom">
+			<div class="ui red icon labeled button" id="startRecordingBtn"><i class="play icon"></i> Start Recording</div>
+			<div class="ui blue icon labeled button" id="pauseRecordingBtn"><i class="pause icon"></i> Pause Recording</div>
+			<div class="ui green icon labeled button" id="compileBtn"><i class="check icon"></i> Compile</div>
+		</div>
+		<div class="div4 divright divbottom">
+			<table>
+				<tr>
+					<td style="padding-right: 10px !important; vertical-align: top;">></td>
+					<td id="output"></td>
+				</tr>
+			</table>
+		</div>
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+		<script type="text/javascript">
+			var memory = {};
+			var projects = [];
+
+			var getValue = function(type, val) {
+				debugger;
+				switch (type) {
+					case 'variable':
+						return memory[val];
+					case 'number':
+					case 'integer':
+						return parseInt(val);
+					case 'decimal':
+						return parseFloat(val);
+					case 'boolean':
+					case 'bool':
+						return parseBoolean(val);
+				}
+			};
+
+			var convertTextToStatements = function(text) {
+				debugger;
+				var statements = text.split("quit");
+				for (var statement of statements) {
+					statement = statement.trim();
+					var tokens = statement.split(" ");
+					switch (tokens[0]) {
+						case "variable":
+							memory[tokens[2]] = getValue(tokens[5], tokens[6]);
+							break;
+						case "add":
+							memory[tokens[10]] = getValue(tokens[1], tokens[2]) + getValue(tokens[4], tokens[5]);
+							break;
+						case "subtract":
+							memory[tokens[10]] = getValue(tokens[1], tokens[2]) - getValue(tokens[4], tokens[5]);
+							break;
+						case "multiply":
+							memory[tokens[10]] = getValue(tokens[1], tokens[2]) * getValue(tokens[4], tokens[5]);
+							break;
+						case "divide":
+							memory[tokens[10]] = getValue(tokens[1], tokens[2]) / getValue(tokens[4], tokens[5]);
+							break;
+						case "modulus":
+							memory[tokens[10]] = getValue(tokens[1], tokens[2]) % getValue(tokens[4], tokens[5]);
+							break;
+						case "print":
+							$('#output').append(getValue(tokens[1], tokens[2]) + "<br />");
+							break;
+						case "show":
+							for (var variable in memory) {
+								$('#output').append(variable + ": " + memory[variable] + "<br />");
+							}
+							break;
+						case "if":
+							var substatements = statement.split("end");
+							substatement = substatement.trim();
+							var subtokens = substatement.split(" ");
+
+					}
+				}
+			};
+
+			window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+		    let finalTranscript = '';
+		    var storedTokenized = [];
+		    var tokenizedFinalTranscript = [];
+		    let recognition = new window.SpeechRecognition();
+		    recognition.interimResults = true;
+		    recognition.maxAlternatives = 10;
+		    recognition.continuous = true;
+		    recognition.onresult = (event) => {
+				let interimTranscript = '';
+				for (let i = event.resultIndex, len = event.results.length; i < len; i++) {
+			        let transcript = event.results[i][0].transcript;
+			        if (event.results[i].isFinal) {
+			        	finalTranscript += transcript;
+			        }
+			        else {
+			        	interimTranscript += transcript;
+			        }
+				}
+				tokenizedFinalTranscript = finalTranscript.split(' ');
+      			document.querySelector('#input').innerHTML = finalTranscript + '<i style="color:#ddd;">' + interimTranscript + '</>';
+		    }
+		    recognition.start();
+
+		    $('#pauseRecordingBtn').click(function () {
+		    	recognition.stop();
+		    	convertTextToStatements(finalTranscript);
+		    });
+
+			// if condition variable num equal to integer 5 end
+			// output variable a end
+			// terminate condition end
+			// else if condition variable num equal to integer 3 end
+			// output variable b end
+			// terminate condition end
+			// else condition end
+			// output variable c end
+
+			/* PLAY -- DEFINING PROGRAM */
+			// print variable a end
+			// show all end
+			// end = end of statement
+
+			// variable number a equal to number 14 end
+			// variable number a equal to variable b end
+			// variable string, boolean, 
+
+			// add variable a and variable b answer assign to variable (name) end
+			// subtract, multiply, divide, modulus
+
+			/* PAUSED -- HELP COMMANDS */
+			// save project (PROMPT FOR NAME: "Whats the name of the project?")
+			// recall project
+
+			/*var a = 6;
+			var result = 1;
+			for (var b = a; b >= 1; b++) {
+				result = result * b;
+				console.log(a);
+			}*/
+
+			// declare variable number a equal to 6 end line
+			// declare variable number result equal to 1 end line
+			// declare for loop end line
+			//	'What is your iterator variable?' declare variable number b equal to (number or variablename) end line
+			//	'What is your condition?' variable b must be (>=) integer 1 end line
+			//	'Set an incrementor:' integer 1 end line
+			// multiply variable result by variable b
+			// declare output variable a
+			// exit loop
+
+			/*var num = 5;
+			if (num == 5) {
+				console.log(a);
+			}
+			else if (num == a) {
+				console.log(b);
+			}
+			else {
+				console.log(c);
+			}*/
+
+			// if condition variable num equal to integer 5
+			// output variable a
+			// terminate condition
+			// else if condition variable num equal to integer 3
+			// output variable b
+			// terminate condition
+			// else condition
+			// output variable c
+
+			/*$(document).ready(function() {
+				$('#startRecordingBtn').click(function() {
+					recognition.start();
+				});
+				$('#pauseRecordingBtn').click(function() {
+					recognition.stop();
+				});
+				$('#compileBtn').click(function() {
+						
+				});
+			});*/
+
+			/*var playing = false;
+
+			window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+		    let finalTranscript = '';
+		    var storedTokenized = [];
+		    var tokenizedFinalTranscript = [];
+		    let recognition = new window.SpeechRecognition();
+		    recognition.interimResults = true;
+		    recognition.maxAlternatives = 10;
+		    recognition.continuous = true;
+		    recognition.onresult = (event) => {
+				let interimTranscript = '';
+				for (let i = event.resultIndex, len = event.results.length; i < len; i++) {
+			        let transcript = event.results[i][0].transcript;
+			        if (event.results[i].isFinal) {
+			        	finalTranscript += transcript;
+			        }
+			        else {
+			        	interimTranscript += transcript;
+			        }
+				}
+				tokenizedFinalTranscript = finalTranscript.split(' ');
+      			document.querySelector('#input').innerHTML = finalTranscript + '<i style="color:#ddd;">' + interimTranscript + '</>';
+		    	console.log(tokenizedFinalTranscript);
+		    }
+		    recognition.start();*/
+
+			/*function listenForKeyPress(event) {
+				var x = event.which || event.keyCode;
+				switch (x) {
+					case 102:
+						// play and pause
+						if (playing) {
+							storedTokenized = tokenizedFinalTranscript;
+						}
+						else {
+							tokenizedFinalTranscript = storedTokenized;
+						}
+						playing = !playing;
+						break;
+					case 106:
+						// compile
+
+						break;
+				}
+			}*/
+
+			/*
+			case 'variable':
+							switch (tokens[1]) {
+								case 'number':
+									addToMemory(tokens[2], parseInt(tokens[5]));
+									break;
+								case 'decimal':
+									addToMemory(tokens[2], parseFloat(tokens[5]));
+									break;
+								case 'string':
+									//addToMemory(tokens[2], ); TODO
+									break;
+								case 'bool':
+								case 'boolean':
+									break;
+							}
+							break;
+						case 'print':
+							print(tokens[1]);
+							break;
+						case 'show':
+							showMemory();
+							break;
+			*/
+		</script>
+	</body>
+</html>
