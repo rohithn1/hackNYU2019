@@ -193,7 +193,9 @@
 					else {
 						speak("I am listening to you.");
 						finalTranscript += " ";
-						recognition.start();
+						setTimeout(function() {
+							recognition.start();
+						}, 2000);
 					}
 					$scope.recording = !$scope.recording;
 				};
