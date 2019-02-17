@@ -48,7 +48,7 @@
 			<a style="float: right; color: white; font-size: 18px; position: relative; top: 20px; right: 15px; cursor: pointer" href="https://docs.google.com/document/d/17OfGF1wyQBUcGpiMWWinRZcD45w4FpF9mZyQ40Hm8G8/edit?usp=sharing" target="_blank">Documentation</a>
 		</div>
 		<div class="div1 divleft divtop">
-			<div style="height: 55%; width: 100%; background: #555; border-bottom: 5px solid white;">
+			<div style="height: 55%; width: 100%; background: #555; overflow-y: scroll; border-bottom: 5px solid white;">
 				<div style="position: relative; top: 66px; padding: 10px 15px; text-align: center; width: 100%; color: white;">
 					<table style="width: 100%;">
 						<tr>
@@ -83,7 +83,7 @@
 				</table>
 			</div>
 		</div>
-		<div class="div2 divright divtop" style="border-left: 5px solid white;">
+		<div class="div2 divright divtop" style="border-left: 5px solid white; overflow-y: scroll;">
 			<table style="position: relative; top: 56px;">
 				<tr>
 					<td style="padding-right: 10px !important; vertical-align: top;">></td>
@@ -96,7 +96,7 @@
 			<div class="ui massive black circular icon button" style="font-size: 50px; display: inline-block; color: lime;" id="compileBtn" ng-click="compile()"><i class="file code icon"></i></div>
 			<span style="position: absolute; bottom: 2px; left: 5px; font-size: 10px; color: black; font-weight: bold;">By Arvind Rajaraman, Rohith Nadimpally, Jeevanantham Murugan, Ansh Gupta, Steven Ng Yu</span>
 		</div>
-		<div class="div4 divright divbottom" style="border-left: 5px solid white; border-top: 5px solid white;" ng-class="{'erroneous': errors.length !== 0 }">
+		<div class="div4 divright divbottom" style="border-left: 5px solid white; border-top: 5px solid white; overflow-y: scroll;" ng-class="{'erroneous': errors.length !== 0 }">
 			<table>
 				<tr>
 					<td style="padding-right: 10px !important; vertical-align: top;">></td>
@@ -221,7 +221,7 @@
 					convertTextToStatements(finalTranscript);
 					convertToPython(finalTranscript);
 					if ($scope.errors.length > 0) speak("There were some errors during compilation. Here is the output: ");
-					else speak("I have compiled your code. Here is the output: ");
+					else speak("I have compiled your code and downloaded to a Python script. Here is the output: ");
 					speak(output);
 					for (var i=1; i <= $scope.errors.length; i++) {
 						speak($scope.errors[i-1]);
@@ -252,7 +252,9 @@
 
 				var getValue = function(type, val) {
 					switch (type) {
-						case 'variable':
+						case "variable":
+						case "bearable":
+						case "durable":
 							return memory[val];
 						case 'number':
 						case 'integer':
@@ -371,7 +373,7 @@
 						}
 					}
 					for (var i = 0; i < $scope.errors.length; i++) {
-						$('#output').append($scope.errors[i] + "<br/>" + $scope.errorDescs[i]);
+						$('#output').append("<br/>" + $scope.errors[i] + "<br/>" + $scope.errorDescs[i] + "<br/>");
 					}
 				};
 
@@ -383,29 +385,31 @@
 						statement = statement.trim();
 						var tokens = statement.split(" ");
 						switch (tokens[0]) {
-							case 'variable':
+							case "variable":
+							case "bearable":
+							case "durable":
 								memory[tokens[2]] = 1;
 								pythonProgram += tokens[2] + " = " + tokens[6] + "\n";
 								break;
 							case 'add':
 								memory[tokens[10]] = 1;
-								pythonProgram += tokens[10] + " = " + tokens[3] + " + " + tokens[5] + "\n";
+								pythonProgram += tokens[10] + " = " + tokens[2] + " + " + tokens[5] + "\n";
 								break;
 							case 'subtract':
 								memory[tokens[10]] = 1;
-								pythonProgram += tokens[10] + " = " + tokens[3] + " - " + tokens[5] + "\n";
+								pythonProgram += tokens[10] + " = " + tokens[2] + " - " + tokens[5] + "\n";
 								break;
 							case 'multiply':
 								memory[tokens[10]] = 1;
-								pythonProgram += tokens[10] + " = " + tokens[3] + " * " + tokens[5] + "\n";
+								pythonProgram += tokens[10] + " = " + tokens[2] + " * " + tokens[5] + "\n";
 								break;
 							case 'divide':
 								memory[tokens[10]] = 1;
-								pythonProgram += tokens[10] + " = " + tokens[3] + " / " + tokens[5] + "\n";
+								pythonProgram += tokens[10] + " = " + tokens[2] + " / " + tokens[5] + "\n";
 								break;
 							case 'modulus':
 								memory[tokens[10]] = 1;
-								pythonProgram += tokens[10] + " = " + tokens[3] + " % " + tokens[5] + "\n";
+								pythonProgram += tokens[10] + " = " + tokens[2] + " % " + tokens[5] + "\n";
 								break;
 							case 'show':
 								for (var property in memory) {
@@ -415,7 +419,7 @@
 								break;
 						}
 					}
-					download("Python Program.py", pythonProgram);
+					download("verbalcode.py", pythonProgram);
 				};
 
 				window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
