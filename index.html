@@ -13,31 +13,78 @@
 			.divbottom { height: 30%; }
 			.div1 { background: #DDD; }
 			.div2 {
-				background: #000;
-				color: white;
+				background: #fff;
+				color: black;
 				padding: 20px;
 				font-family: Menlo, monospace;
 			}
-			.div3 { background: #555; padding: 40px 5%; text-align: center; white-space: nowrap !important; }
+			.div3 { background: #333; padding: 40px 5%; text-align: center; white-space: nowrap !important; }
 			.div4 {
 				background: #333;
 				color: white;
 				padding: 20px;
 				font-family: Menlo, monospace;
 			}
+			#projectsTable {
+				color: white;
+			}
+			#projectsTable td {
+				padding: 5px;
+			}
+			.active {
+				background: white;
+				color: #555;
+			}
+			.erroneous {
+				background: red;
+				color: white;
+			}
 		</style>
 	</head>
 	<body ng-app="VerbalCode" ng-controller="MainController" ng-keydown="listenForKeyPress()" my-enter="toggleRecording()"> <!-- -->
-		<div class="div1 divleft divtop" style="">
-			<div style="height: 50%; width: 100%; background: #555; border-bottom: 5px solid white;">
-				a
+		<div style="width: 100%; background: black; position: fixed;">
+			<img src="logo.png" height="48" width="48" style="margin-left: 10px; margin-top: 4px;" />
+			<span style="color: white; font-size: 24px; position: relative; bottom: 15px; left: 10px;">Verbal Coding</span>
+			<a style="float: right; color: white; font-size: 18px; position: relative; top: 20px; right: 15px; cursor: pointer" href="https://docs.google.com/document/d/1XVLbSkzS3voa1had8JyeDu0aFb-S6uEYXICqrLoUlu8/edit?usp=sharing" target="_blank">Documentation</a>
+		</div>
+		<div class="div1 divleft divtop">
+			<div style="height: 55%; width: 100%; background: #555; border-bottom: 5px solid white;">
+				<div style="position: relative; top: 66px; padding: 10px 15px; text-align: center; width: 100%; color: white;">
+					<table style="width: 100%;">
+						<tr>
+							<th style="width: 100%; padding-bottom: 10px !important;">Tutorial Lessons</th>
+						</tr>
+						<tr>
+							<td><i class="play icon" ng-show="currentTutorialStatement === 0"></i> Introduction</td>
+						</tr>
+						<tr>
+							<td><i class="play icon" ng-show="currentTutorialStatement === 1"></i> Lesson 0</td>
+						</tr>
+						<tr>
+							<td><i class="play icon" ng-show="currentTutorialStatement === 2"></i> Lesson 1</td>
+						</tr>
+						<tr>
+							<td><i class="play icon" ng-show="currentTutorialStatement === 3"></i> Lesson 2</td>
+						</tr>
+						<tr>
+							<td><i class="play icon" ng-show="currentTutorialStatement === 4"></i> Lesson 3</td>
+						</tr>
+					</table>
+				</div>
 			</div>
-			<div style="height: 50%; width: 100%; background: #333">
-				b
+			<div style="height: 45%; width: 100%; background: #444; overflow-y: scroll; padding: 20px; text-align: center;">
+				<table style="width: 100%;" id="projectsTable">
+					<tr>
+						<th style="width: 100%; padding-bottom: 10px !important;">Projects</th>
+					</tr>
+					<tr ng-repeat="project in projects" ng-class="{'active': currproject === $index}">
+						<td>{{project}}</td>
+					</tr>
+				</table>
 			</div>
 		</div>
 		<div class="div2 divright divtop" style="border-left: 5px solid white;">
-			<table>
+			<table style="position: relative; top: 56px;">
 				<tr>
 					<td style="padding-right: 10px !important; vertical-align: top;">></td>
 					<td id="input"></td>
@@ -45,10 +92,11 @@
 			</table>
 		</div>
 		<div class="div3 divleft divbottom" style="border-top: 5px solid white;">
-			<div class="ui circular icon button" style="font-size: 50px; display: inline-block;" id="recordingBtn" ng-click="toggleRecording()" ng-class="{'red': recording, 'green': !recording}"><i class="microphone icon"></i></div>
-			<div class="ui massive blue circular icon button" style="font-size: 50px; display: inline-block;" id="compileBtn" ng-click="compile()"><i class="code icon"></i></div>
+			<div class="ui circular icon button" style="font-size: 50px; display: inline-block; color: lime;" id="recordingBtn" ng-click="toggleRecording()" ng-class="{'red': recording, 'black': !recording}"><i class="microphone icon"></i></div>
+			<div class="ui massive black circular icon button" style="font-size: 50px; display: inline-block; color: lime;" id="compileBtn" ng-click="compile()"><i class="file code icon"></i></div>
+			<span style="position: absolute; bottom: 2px; left: 5px; font-size: 10px; color: black; font-weight: bold;">By Arvind Rajaraman, Rohith Nadimpally, Jeevanantham Murugan, Ansh Gupta, Steven Ng Yu</span>
 		</div>
-		<div class="div4 divright divbottom" style="border-left: 5px solid white; border-top: 5px solid white;">
+		<div class="div4 divright divbottom" style="border-left: 5px solid white; border-top: 5px solid white;" ng-class="{'erroneous': errors.length !== 0 }">
 			<table>
 				<tr>
 					<td style="padding-right: 10px !important; vertical-align: top;">></td>
@@ -71,8 +119,17 @@
 			                });
 			                event.preventDefault();
 			            }
+			            else if (event.which == 13) {
+			            	$scope.setTranscriptToCurrentProject();
+			            }
+			            else if (event.which === 38) {
+			            	$scope.decProject();
+			            }
 			            else if (event.which === 39) {
 			            	$scope.goToNextTutorialStatement();
+			            }
+			            else if (event.which === 40) {
+			            	$scope.incProject();
 			            }
 			            else if (event.which === 83) {
 			            	$scope.saveProject();
@@ -85,14 +142,42 @@
 			});
 
 			var controller = app.controller('MainController', function($scope) {
-				$scope.message = "Hi";
 				$scope.recording = false;
+				$scope.errors = [];
+				$scope.errorDescs = [];
 				$scope.tutorialStatements = [
 					"Whether you’re a novice coder or someone with no background in programming, this is the perfect platform to help you embark on your coding journey. We know how challenging coding can be for those faced with visual impairment - that’s why we made coding much more accessible through verbal communication. These tutorials are meant to guide you step-by-step throughout the entire process, so don’t be afraid to make mistakes! With that said, good luck and make sure to have fun! Press the right arrow when you're ready!",
 					"Welcome to Lesson 0. In this lesson, we will introduce to you the some of the commands you will use to start coding here on VerbalCoding. With verbal coding, we will use the right and left arrow keys to move forward and backward in the tutorial respectively. Press F when you want to toggle between recording and unrecording, and press J to compile your code.",
-					"Welcome to Lesson 1. We begin this tutorial by learning one of the simplest yet most powerful tools in computer programming: setting a variable. For this tutorial, repeat what I say: variable number Alpha equal to number 14. This will make it so anytime that you use the variable Apple, it will be equal to 14, unless you change it later. Try saying this line by yourself."
+					"Welcome to Lesson 1. We begin this tutorial by learning one of the simplest yet most powerful tools in computer programming: setting a variable. For this tutorial, repeat what I say: variable number Alpha equal to number 14. This will make it so anytime that you use the variable Apple, it will be equal to 14, unless you change it later. Try saying this line by yourself and press the right arrow when you're ready!",
+					"Welcome to Lesson 2. In lesson number 2, we will go over how to do mathematical operations. The five types of operations we will go over are addition, subtraction, multiplication, division and modulus. For those who don’t know modulus, it is the remainder when dividing. For example, you could say 'add number 7 and number 8 answer assign to variable Apple quit'. So, what this statement will do, is assign the variable Apple the value of 15. To continue to lesson number 3, press the right arrow.",
+					"Welcome to Lesson 3. For lesson 3, you will be learning how to create if condition statements. If condition statements either produce True or False. This would result in whether or not the further code runs. For example, consider, “if condition number 5 greater than or equal to number 4 finish, output number 100 finish, terminate condition finish. Since the condition is true, the number 100 will be outputted and the condition terminated. Try making your own if and else control flow. When you're ready, press the right arrow."
 				];
 				$scope.currentTutorialStatement = 0;
+
+				$scope.projects = [];
+				$scope.currproject = -1;
+				for (var key in localStorage) {
+					if (!localStorage.hasOwnProperty(key)) continue;
+					$scope.projects.push(key);
+				}
+
+				$scope.incProject = function() {
+					if ($scope.currproject == $scope.projects.length-1) return;
+					$scope.currproject++;
+					speak("Navigating to the next project: " + $scope.projects[$scope.currproject] + ". Press Enter to load it.");
+				};
+
+				$scope.decProject = function() {
+					if ($scope.currproject == 0) return;
+					$scope.currproject--;
+					speak("Navigating to the previous project: " + $scope.projects[$scope.currproject] + ". Press Enter to load it.");
+				};
+
+				$scope.setTranscriptToCurrentProject = function() {
+					speak("I have loaded the code for the project " + $scope.projects[$scope.currproject] + ".");
+					finalTranscript = window.localStorage.getItem($scope.projects[$scope.currproject]);
+					$("#input").html(finalTranscript);
+				};
 
 				$scope.goToNextTutorialStatement = function() {
 					recognition.stop();
@@ -114,23 +199,35 @@
 				};
 
 				$scope.compile = function() {
+					debugger;
 					output = [];
 					memory = {};
 					$("#output").html("");
-					speak("I have compiled your code. Here is the output: ");
 					convertTextToStatements(finalTranscript);
+					if ($scope.errors.length > 0) speak("There were some errors during compilation. Here is the output: ");
+					else speak("I have compiled your code. Here is the output: ");
 					speak(output);
+					for (var i=1; i <= $scope.errors.length; i++) {
+						speak($scope.errors[i-1]);
+						speak($scope.errorDescs[i-1]);
+					}
 				};
 
 				$scope.saveProject = function() {
+					var t = finalTranscript;
 					recognition.stop();
-					speak("What would you like to name this project? You have 5 seconds to tell me.");
+					speak("What would you like to name this project? You have 7 seconds to tell me.");
 					setTimeout(function() {
 						recognition.start();
 					}, 3000);
 					setTimeout(function() {
 						recognition.stop();
-					}, 8000);
+						var projectName = finalTranscript.replace(t, "");
+						speak("I am saving this project as " + projectName);
+						finalTranscript = t;
+						window.localStorage.setItem(projectName, finalTranscript);
+						$('#input').html(finalTranscript);
+					}, 10000);
 				}
 
 				var memory = {};
@@ -150,9 +247,12 @@
 						case 'bool':
 							return parseBoolean(val);
 					}
+					return val;
 				};
 
 				var convertTextToStatements = function(text) {
+					$scope.errors = [];
+					$scope.errorDescs = [];
 					var statements = text.split("&#9668;<br/>");
 					for (var statement of statements) {
 						statement = statement.trim();
@@ -162,6 +262,10 @@
 							case "bearable":
 							case "durable":
 								memory[tokens[2]] = getValue(tokens[5], tokens[6]);
+								if (tokens[1] !== "number" && tokens[1] !== "integer" && tokens[1] !== "decimal" && tokens[1] !== "boolean" && tokens[1] !== "bool") {
+									$scope.errors.push("Type Casting Error");
+									$scope.errorDescs.push("When you declared the variable " + tokens[1] + ", you forgot to declare a type! In many programming languages, it is important to declare the type of a variable, because ambiguity can make the compiler confused and create wrong calculations.");
+								}
 								break;
 							case "add":
 								memory[tokens[10]] = getValue(tokens[1], tokens[2]) + getValue(tokens[4], tokens[5]);
@@ -184,7 +288,11 @@
 								output.push(getValue(tokens[1], tokens[2]));
 								break;
 							case "show":
-								for (var variable in memory) {
+								if (tokens[1] !== "all") {
+									$scope.errors.push("Ambiguous Request to Show");
+									$scope.errorDescs.push("When you called the show command, you did not suffix the command with all. Without specifying what to show, the compiler is confused on what to show to the user.");
+								}
+								else for (var variable in memory) {
 									$('#output').append(variable + ": " + memory[variable] + "<br />");
 									output.push(variable + ": " + memory[variable]);
 								}
@@ -246,11 +354,13 @@
 								break;
 						}
 					}
+					for (var i = 0; i < $scope.errors.length; i++) {
+						$('#output').append($scope.errors[i] + "<br/>" + $scope.errorDescs[i]);
+					}
 				};
 
 				window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 			    let finalTranscript = '';
-			    //$scope.tokenizedFinalTranscript = [];
 			    let recognition = new window.SpeechRecognition();
 			    recognition.interimResults = true;
 			    recognition.lang = 'en-US';
@@ -270,171 +380,20 @@
 				        	interimTranscript += transcript;
 				        }
 					}
-					//$scope.tokenizedFinalTranscript = finalTranscript.split(' ');
 	      			document.querySelector('#input').innerHTML = finalTranscript + '<i style="color:#aaa;">' + interimTranscript + '</>';
 			    }
 
 			    var speak = function(text) {
 			    	var message = new SpeechSynthesisUtterance();
 			    	var voices = window.speechSynthesis.getVoices();
-			    	message.voice = voices[32];
-			    	message.rate = 0.9;
+			    	message.voice = voices[0];
+			    	message.rate = 1;
 			    	message.pitch = 1;
 			    	message.text = text;
 
 			    	speechSynthesis.speak(message);
 			    };
-
-			    //convertTextToStatements("variable number alpha equal to number 16 &#9632;<br/> variable number apple equal to number 10 &#9632;<br/> variable number cow equal to number 18 &#9632;<br/> if condition variable alpha greater than or equal to number 215 finish print variable apple finish terminate condition finish else condition finish print number 3 finish terminate condition finish &#9632;<br/> show all &#9632;<br/>");
 			});
-			
-			function listenForKeyPress(event) {
-				var key = event.which || event.keyCode;
-				switch (key) {
-					case 102:
-						// play and pause
-						if (playing) {
-							storedTokenized = tokenizedFinalTranscript;
-						}
-						else {
-							tokenizedFinalTranscript = storedTokenized;
-						}
-						playing = !playing;
-						break;
-					case 106:
-						// compile
-
-						break;
-				}
-			}
-
-			// if condition variable num greater than or equal to integer 5 end
-			// output variable a end
-			// terminate condition end
-			// else if condition variable num equal to integer 3 end
-			// output variable b end
-			// terminate condition end
-			// else condition end
-			// output variable c end
-
-			/* PLAY -- DEFINING PROGRAM */
-			// print variable a end
-			// show all end
-			// end = end of statement
-
-			// variable number a equal to number 14 end
-			// variable number a equal to variable b end
-			// variable string, boolean, 
-
-			// add variable a and variable b answer assign to variable (name) end
-			// subtract, multiply, divide, modulus
-
-			/* PAUSED -- HELP COMMANDS */
-			// save project (PROMPT FOR NAME: "Whats the name of the project?")
-			// recall project
-
-			/*var a = 6;
-			var result = 1;
-			for (var b = a; b >= 1; b++) {
-				result = result * b;
-				console.log(a);
-			}*/
-
-			// declare variable number a equal to 6 end line
-			// declare variable number result equal to 1 end line
-			// declare for loop end line
-			//	'What is your iterator variable?' declare variable number b equal to (number or variablename) end line
-			//	'What is your condition?' variable b must be (>=) integer 1 end line
-			//	'Set an incrementor:' integer 1 end line
-			// multiply variable result by variable b
-			// declare output variable a
-			// exit loop
-
-			/*var num = 5;
-			if (num == 5) {
-				console.log(a);
-			}
-			else if (num == a) {
-				console.log(b);
-			}
-			else {
-				console.log(c);
-			}*/
-
-			// if condition variable num equal to integer 5
-			// output variable a
-			// terminate condition
-			// else if condition variable num equal to integer 3
-			// output variable b
-			// terminate condition
-			// else condition
-			// output variable c
-
-			/*$(document).ready(function() {
-				$('#startRecordingBtn').click(function() {
-					recognition.start();
-				});
-				$('#pauseRecordingBtn').click(function() {
-					recognition.stop();
-				});
-				$('#compileBtn').click(function() {
-						
-				});
-			});*/
-
-			/*var playing = false;
-
-			window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-		    let finalTranscript = '';
-		    var storedTokenized = [];
-		    var tokenizedFinalTranscript = [];
-		    let recognition = new window.SpeechRecognition();
-		    recognition.interimResults = true;
-		    recognition.maxAlternatives = 10;
-		    recognition.continuous = true;
-		    recognition.onresult = (event) => {
-				let interimTranscript = '';
-				for (let i = event.resultIndex, len = event.results.length; i < len; i++) {
-			        let transcript = event.results[i][0].transcript;
-			        if (event.results[i].isFinal) {
-			        	finalTranscript += transcript;
-			        }
-			        else {
-			        	interimTranscript += transcript;
-			        }
-				}
-				tokenizedFinalTranscript = finalTranscript.split(' ');
-      			document.querySelector('#input').innerHTML = finalTranscript + '<i style="color:#ddd;">' + interimTranscript + '</>';
-		    	console.log(tokenizedFinalTranscript);
-		    }
-		    recognition.start();*/
-
-			/**/
-
-			/*
-			case 'variable':
-							switch (tokens[1]) {
-								case 'number':
-									addToMemory(tokens[2], parseInt(tokens[5]));
-									break;
-								case 'decimal':
-									addToMemory(tokens[2], parseFloat(tokens[5]));
-									break;
-								case 'string':
-									//addToMemory(tokens[2], ); TODO
-									break;
-								case 'bool':
-								case 'boolean':
-									break;
-							}
-							break;
-						case 'print':
-							print(tokens[1]);
-							break;
-						case 'show':
-							showMemory();
-							break;
-			*/
 		</script>
 	</body>
 </html>
