@@ -141,6 +141,19 @@
 			    };
 			});
 
+			function download(filename, text) {
+			  var element = document.createElement('a');
+			  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+			  element.setAttribute('download', filename);
+
+			  element.style.display = 'none';
+			  document.body.appendChild(element);
+
+			  element.click();
+
+			  document.body.removeChild(element);
+			}
+
 			var controller = app.controller('MainController', function($scope) {
 				$scope.recording = false;
 				$scope.errors = [];
@@ -206,6 +219,7 @@
 					memory = {};
 					$("#output").html("");
 					convertTextToStatements(finalTranscript);
+					convertToPython(finalTranscript);
 					if ($scope.errors.length > 0) speak("There were some errors during compilation. Here is the output: ");
 					else speak("I have compiled your code. Here is the output: ");
 					speak(output);
@@ -359,6 +373,49 @@
 					for (var i = 0; i < $scope.errors.length; i++) {
 						$('#output').append($scope.errors[i] + "<br/>" + $scope.errorDescs[i]);
 					}
+				};
+
+				var convertToPython = function(text) {
+					var statements = text.split("&#9668;<br/>");
+					var pythonProgram = "";
+					var memory = {};
+					for (var statement of statements) {
+						statement = statement.trim();
+						var tokens = statement.split(" ");
+						switch (tokens[0]) {
+							case 'variable':
+								memory[tokens[2]] = 1;
+								pythonProgram += tokens[2] + " = " + tokens[6] + "\n";
+								break;
+							case 'add':
+								memory[tokens[10]] = 1;
+								pythonProgram += tokens[10] + " = " + tokens[3] + " + " + tokens[5] + "\n";
+								break;
+							case 'subtract':
+								memory[tokens[10]] = 1;
+								pythonProgram += tokens[10] + " = " + tokens[3] + " - " + tokens[5] + "\n";
+								break;
+							case 'multiply':
+								memory[tokens[10]] = 1;
+								pythonProgram += tokens[10] + " = " + tokens[3] + " * " + tokens[5] + "\n";
+								break;
+							case 'divide':
+								memory[tokens[10]] = 1;
+								pythonProgram += tokens[10] + " = " + tokens[3] + " / " + tokens[5] + "\n";
+								break;
+							case 'modulus':
+								memory[tokens[10]] = 1;
+								pythonProgram += tokens[10] + " = " + tokens[3] + " % " + tokens[5] + "\n";
+								break;
+							case 'show':
+								for (var property in memory) {
+									if (!memory.hasOwnProperty(property)) continue;
+									pythonProgram += "print(\"" + property + ":\" + " + property + ")" + "\n";
+								}
+								break;
+						}
+					}
+					download("Python Program.py", pythonProgram);
 				};
 
 				window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
